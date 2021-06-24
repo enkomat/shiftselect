@@ -1,10 +1,19 @@
-.wrapper {
+.wrapper 
+{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
     position: relative;
     height: 100% !important;
     width: 100% !important;
 }
 
-.selection {
+.selection 
+{
     display: block;
     position: absolute;
 }
@@ -19,11 +28,11 @@
 
 .grid input
 {
-    width: 45px;
-    height: 45px;
+    width: 22px;
+    height: 22px;
     background-color:gainsboro;
     font-size: 60px;
     text-align: center;
     font-weight: bold;
-    margin: 2px;
+    margin: 1px;
 }

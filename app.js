@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () =>
     const gridDisplay = document.querySelector('.grid');
     const scoreDisplay = document.getElementById('score');
     const resultDisplay = document.getElementById('result');
-    const width = 8;
+    const width = 16;
     var squares = [];
     var squareRects = [];
 
@@ -31,8 +31,10 @@ document.addEventListener('DOMContentLoaded', () =>
     }
 
     var selection;
+    var selectionAmt;
     var inputs;
     var originalInputValues = [];
+    var alreadySelected = []
     var x;
     var y;
     var finX;
@@ -46,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () =>
     {
         inputs = document.getElementsByTagName('input');
         setInputValues();
+        prepareAlreadySelectedArray();
+        selectionAmt = 0;
         x = event.pageX;
         y = event.pageY;
         var newSelection = document.createElement("div");
@@ -90,7 +94,28 @@ document.addEventListener('DOMContentLoaded', () =>
     function mouseUp(event) 
     {
         ismousedown = false;
+        console.log(selectionAmt);
+        if(selectionAmt < 4) //it's possible that this doesn't solve the problem correctly
+        {
+            setBoardToBeforeSelect();
+        }
         selection.remove();
+    }
+
+    function setBoardToBeforeSelect()
+    {
+        for(let i = 0; i < width*width; i++)
+        {
+            inputs[i].checked = originalInputValues[i];
+        }
+    }
+
+    function prepareAlreadySelectedArray()
+    {
+        for(let i = 0; i < width*width; i++)
+        {
+            alreadySelected[i] = false;
+        }
     }
 
     function checkIfOverSquare()
@@ -99,9 +124,16 @@ document.addEventListener('DOMContentLoaded', () =>
         for(let i = 0; i < width*width; i++)
         {
             if(selectionRect.right > inputs[i].getBoundingClientRect().left
-            && selectionRect.bottom > inputs[i].getBoundingClientRect().top)
+            && selectionRect.bottom > inputs[i].getBoundingClientRect().top
+            && selectionRect.left < inputs[i].getBoundingClientRect().right
+            && selectionRect.top < inputs[i].getBoundingClientRect().bottom)
             {
-                inputs[i].checked = !originalInputValues[i];
+                if(!alreadySelected[i])
+                {
+                    selectionAmt++;
+                    alreadySelected[i] = true;
+                    inputs[i].checked = !originalInputValues[i];
+                }
             }
         }
     }
