@@ -1,0 +1,29 @@
+.wrapper {
+    position: relative;
+    height: 100% !important;
+    width: 100% !important;
+}
+
+.selection {
+    display: block;
+    position: absolute;
+}
+
+.grid 
+{
+    display: flex;
+    flex-wrap: wrap;
+    width: 400px;
+    height: 400px;
+}
+
+.grid input
+{
+    width: 45px;
+    height: 45px;
+    background-color:gainsboro;
+    font-size: 60px;
+    text-align: center;
+    font-weight: bold;
+    margin: 2px;
+}
