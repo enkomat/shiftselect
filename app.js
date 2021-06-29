@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () =>
     var squareRects = [];
     var checkedSquareAmt = 10;
 
+    var level1 = [false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false]
+
     //create a playing board
     function createBoard()
     {
@@ -18,6 +20,16 @@ document.addEventListener('DOMContentLoaded', () =>
             gridDisplay.appendChild(square);
             squares.push(square);
             squareRects.push(square.getBoundingClientRect());
+        }
+        setBoardState();
+    }
+
+    function setBoardState()
+    {
+        inputs = document.getElementsByTagName('input');
+        for (let i=0; i < width*width; i++)
+        {
+            inputs[i].checked = level1[i];
         }
     }
 
@@ -92,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () =>
             setBoardToBeforeSelect();
         }
         selectionBox.remove();
+        logBoardState();
         if(!boxesStillChecked()) window.alert("You solved the level!");
     }
 
@@ -138,6 +151,18 @@ document.addEventListener('DOMContentLoaded', () =>
         {
             alreadySelected[i] = false;
         }
+    }
+
+    function logBoardState()
+    {
+        inputs = document.getElementsByTagName('input');
+        var checkedArray = []
+        for(let i = 0; i < width*width; i++)
+        {
+            checkedArray.push(inputs[i].checked);
+        }
+        var jsonArray = JSON.stringify(checkedArray)
+        console.log(jsonArray);
     }
 
     function checkIfOverSquare()
