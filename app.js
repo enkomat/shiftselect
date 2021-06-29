@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () =>
     const width = 16;
     var squares = [];
     var squareRects = [];
+    var checkedSquareAmt = 10;
 
     //create a playing board
     function createBoard()
@@ -30,8 +31,9 @@ document.addEventListener('DOMContentLoaded', () =>
         }
     }
 
-    var selection;
-    var selectionAmt;
+    var selectionBox;
+    var newCheckboxAmt;
+    var removedCheckboxAmt;
     var inputs;
     var originalInputValues = [];
     var alreadySelected = []
@@ -40,24 +42,35 @@ document.addEventListener('DOMContentLoaded', () =>
     var finX;
     var finY;
     var ismousedown = false;
-    document.addEventListener('mousedown', mouseDown)
-    document.addEventListener('mousemove', mouseMove)
-    document.addEventListener('mouseup', mouseUp)
+    var editMode = false;
+    document.addEventListener('mousedown', mouseDown);
+    document.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', mouseUp);
+    document.addEventListener('keydown', keyDown);
+    document.addEventListener('keyup', keyUp);
+
+    function keyDown(event)
+    {
+        if(event.key == "e") editMode = true;
+    }
+
+    function keyUp(event)
+    {
+        if(event.key == "e") editMode = false;
+    }
     
+    // when you press mouse down:
+    // - original input values array is established
+    // - bool array for whether a checkbox has already been selected created
+    // - selectionBox box is created
     function mouseDown(event) 
     {
         inputs = document.getElementsByTagName('input');
-        setInputValues();
-        prepareAlreadySelectedArray();
-        selectionAmt = 0;
-        x = event.pageX;
-        y = event.pageY;
-        var newSelection = document.createElement("div");
-        newSelection.className = "selection"
-        newSelection.style.top = y.toString() + "px";
-        newSelection.style.left = x.toString() + "px";
-        document.body.appendChild(newSelection);
-        selection = newSelection;
+        setOriginalInputValues();
+        setAlreadySelectedArray();
+        createSelectionBox(event);
+        newCheckboxAmt = 0;
+        removedCheckboxAmt = 0;
         ismousedown = true;
     }
     
@@ -65,28 +78,7 @@ document.addEventListener('DOMContentLoaded', () =>
     {
         if (ismousedown) 
         {
-            finX = event.pageX;
-            finY = event.pageY;
-            dX = (finX - x);
-            dY = (finY - y);
-            if(finY < y) 
-            {
-                selection.style.top = finY.toString() + 'px';
-                selection.style.bottom = y.toString() + 'px';
-                dY = (y - finY);
-            }
-            if(finX < x) 
-            {
-                selection.style.left = finX.toString() + 'px';
-                selection.style.right = x.toString() + 'px';
-                dX = (x - finX);
-            }
-            xString = dX.toString() + 'px';
-            yString = dY.toString() + 'px';
-            selection.style.border = '1px dashed #ccc';
-            selection.style.display = 'block';
-            selection.style.width = xString;
-            selection.style.height = yString;
+            scaleSelectionBox(event)
             checkIfOverSquare();
         }
     }
@@ -94,12 +86,42 @@ document.addEventListener('DOMContentLoaded', () =>
     function mouseUp(event) 
     {
         ismousedown = false;
-        console.log(selectionAmt);
-        if(selectionAmt < 4) //it's possible that this doesn't solve the problem correctly
+        console.log(newCheckboxAmt);
+        if(selectionDoesNotSatisfyRules() && !editMode) //it's possible that this doesn't solve the problem correctly
         {
             setBoardToBeforeSelect();
         }
-        selection.remove();
+        selectionBox.remove();
+        if(!boxesStillChecked()) window.alert("You solved the level!");
+    }
+
+    function selectionDoesNotSatisfyRules()
+    {
+        return (newCheckboxAmt < 4 || removedCheckboxAmt < 4) && boxesStillChecked();
+    }
+
+    function boxesStillChecked()
+    {
+        inputs = document.getElementsByTagName('input');
+        for(let i = 0; i < width*width; i++)
+        {
+            if(inputs[i].checked) return true;
+        }
+        return false;
+    }
+
+    function checkRandomInputs()
+    {
+        inputs = document.getElementsByTagName('input');
+        for(let i = 0; i < width*width; i++)
+        {
+            var random = Math.random();
+            if(random > 0.75 && checkedSquareAmt < 20)
+            {
+                inputs[i].checked = true;
+                checkedSquareAmt++;
+            }
+        }
     }
 
     function setBoardToBeforeSelect()
@@ -110,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () =>
         }
     }
 
-    function prepareAlreadySelectedArray()
+    function setAlreadySelectedArray()
     {
         for(let i = 0; i < width*width; i++)
         {
@@ -120,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function checkIfOverSquare()
     {
-        selectionRect = selection.getBoundingClientRect();
+        selectionRect = selectionBox.getBoundingClientRect();
         for(let i = 0; i < width*width; i++)
         {
             if(selectionRect.right > inputs[i].getBoundingClientRect().left
@@ -130,19 +152,66 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 if(!alreadySelected[i])
                 {
-                    selectionAmt++;
                     alreadySelected[i] = true;
-                    inputs[i].checked = !originalInputValues[i];
+                    if(originalInputValues[i] == false)
+                    {
+                        inputs[i].checked = true;
+                        newCheckboxAmt++;
+                    }
+                    else
+                    {
+                        inputs[i].checked = false;
+                        removedCheckboxAmt++;
+                    }
+                    
                 }
             }
         }
     }
 
-    function setInputValues()
+    function setOriginalInputValues()
     {
         for(let i = 0; i < inputs.length; i++)
         {
             originalInputValues[i] = inputs[i].checked;
         }
+    }
+
+    function createSelectionBox(event)
+    {
+        x = event.pageX;
+        y = event.pageY;
+        var newSelection = document.createElement("div");
+        newSelection.className = "selectionBox"
+        newSelection.style.top = y.toString() + "px";
+        newSelection.style.left = x.toString() + "px";
+        document.body.appendChild(newSelection);
+        selectionBox = newSelection;
+    }
+
+    function scaleSelectionBox(event)
+    {
+        finX = event.pageX;
+        finY = event.pageY;
+        dX = (finX - x);
+        dY = (finY - y);
+        if(finY < y) 
+        {
+            selectionBox.style.top = finY.toString() + 'px';
+            selectionBox.style.bottom = y.toString() + 'px';
+            dY = (y - finY);
+        }
+        if(finX < x) 
+        {
+            selectionBox.style.left = finX.toString() + 'px';
+            selectionBox.style.right = x.toString() + 'px';
+            dX = (x - finX);
+        }
+        xString = dX.toString() + 'px';
+        yString = dY.toString() + 'px';
+        selectionBox.style.border = '1px dashed #ccc';
+        selectionBox.style.display = 'block';
+        selectionBox.style.width = xString;
+        selectionBox.style.height = yString;
     }
 })
