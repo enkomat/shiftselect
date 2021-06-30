@@ -8,7 +8,15 @@ document.addEventListener('DOMContentLoaded', () =>
     var squareRects = [];
     var checkedSquareAmt = 10;
 
+    var currentLevelIndex = 0;
+
     var level1 = [false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false]
+    
+    var level2 = [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,true,true,true,true,true,true,true,true,true,true,true,true,false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,true,false,true,true,false,true,false,true,true,true,true,true,true,true,true,false,true,false,true,true,false,true,false,true,false,false,false,false,false,false,true,false,true,false,true,true,false,true,false,true,false,true,true,true,true,false,true,false,true,false,true,true,false,true,false,true,false,true,false,false,true,false,true,false,true,false,true,true,false,true,false,true,false,true,false,false,true,false,true,false,true,false,true,true,false,true,false,true,false,true,true,true,true,false,true,false,true,false,true,true,false,true,false,true,false,false,false,false,false,false,true,false,true,false,true,true,false,true,false,true,true,true,true,true,true,true,true,false,true,false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,true,false,true,true,false,true,true,true,true,true,true,true,true,true,true,true,true,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]
+
+    var levels = [level1, level2];
+
+    createBoard()
 
     //create a playing board
     function createBoard()
@@ -21,26 +29,45 @@ document.addEventListener('DOMContentLoaded', () =>
             squares.push(square);
             squareRects.push(square.getBoundingClientRect());
         }
-        setBoardState();
+        setBoardState(levels[currentLevelIndex]);
     }
 
-    function setBoardState()
+    function setBoardState(boardArray)
     {
         inputs = document.getElementsByTagName('input');
         for (let i=0; i < width*width; i++)
         {
-            inputs[i].checked = level1[i];
+            inputs[i].checked = boardArray[i];
         }
     }
 
-    createBoard()
-
-    function checkForwin()
+    function clearBoard()
     {
-        for (let i=0; i < squares.length; i++)
+        inputs = document.getElementsByTagName('input');
+        for (let i=0; i < width*width; i++)
         {
-            resultDisplay.innerHTML = 'You Win!'
+            inputs[i].checked = false;
         }
+    }
+
+    function resetLevel()
+    {
+        setBoardState(levels[currentLevelIndex]);
+    }
+
+    function levelWin()
+    {
+        window.alert("You solved the level!");
+        //load next level:
+        currentLevelIndex++;
+        document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
+        setBoardState(levels[currentLevelIndex]);
+    }
+
+    function checkLevelWin()
+    {
+        if(!boxesStillChecked()) levelWin();
+        else window.alert("You haven't cleared the board yet!");
     }
 
     var selectionBox;
@@ -60,15 +87,20 @@ document.addEventListener('DOMContentLoaded', () =>
     document.addEventListener('mouseup', mouseUp);
     document.addEventListener('keydown', keyDown);
     document.addEventListener('keyup', keyUp);
+    document.getElementById("reset").addEventListener('click', resetLevel);
+    document.getElementById("done").addEventListener('click', checkLevelWin);
 
     function keyDown(event)
     {
-        if(event.key == "e") editMode = true;
+        if(event.key == "e") editMode = !editMode;
+        if(event.key == "c") clearBoard();
+        //reset current level:
+        if(event.key == "r") resetLevel();
     }
 
     function keyUp(event)
     {
-        if(event.key == "e") editMode = false;
+        //if(event.key == "e") editMode = false;
     }
     
     // when you press mouse down:
@@ -105,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () =>
         }
         selectionBox.remove();
         logBoardState();
-        if(!boxesStillChecked()) window.alert("You solved the level!");
     }
 
     function selectionDoesNotSatisfyRules()
