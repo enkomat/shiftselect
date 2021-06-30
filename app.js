@@ -3,18 +3,32 @@ document.addEventListener('DOMContentLoaded', () =>
     const gridDisplay = document.querySelector('.grid');
     const scoreDisplay = document.getElementById('score');
     const resultDisplay = document.getElementById('result');
+    const resetButton = document.getElementById('reset');
+    const doneButton = document.getElementById('done');
     const width = 16;
     var squares = [];
     var squareRects = [];
     var checkedSquareAmt = 10;
 
-    var currentLevelIndex = 0;
+    var currentLevelIndex = 7;
 
-    var level1 = [false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false]
+    const level1 = [false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,false,false,true,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false]
     
-    var level2 = [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,true,true,true,true,true,true,true,true,true,true,true,true,false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,true,false,true,true,false,true,false,true,true,true,true,true,true,true,true,false,true,false,true,true,false,true,false,true,false,false,false,false,false,false,true,false,true,false,true,true,false,true,false,true,false,true,true,true,true,false,true,false,true,false,true,true,false,true,false,true,false,true,false,false,true,false,true,false,true,false,true,true,false,true,false,true,false,true,false,false,true,false,true,false,true,false,true,true,false,true,false,true,false,true,true,true,true,false,true,false,true,false,true,true,false,true,false,true,false,false,false,false,false,false,true,false,true,false,true,true,false,true,false,true,true,true,true,true,true,true,true,false,true,false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,true,false,true,true,false,true,true,true,true,true,true,true,true,true,true,true,true,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]
+    const level2 = [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,true,true,true,true,true,true,true,true,true,true,true,true,false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,true,false,true,true,false,true,false,true,true,true,true,true,true,true,true,false,true,false,true,true,false,true,false,true,false,false,false,false,false,false,true,false,true,false,true,true,false,true,false,true,false,true,true,true,true,false,true,false,true,false,true,true,false,true,false,true,false,true,false,false,true,false,true,false,true,false,true,true,false,true,false,true,false,true,false,false,true,false,true,false,true,false,true,true,false,true,false,true,false,true,true,true,true,false,true,false,true,false,true,true,false,true,false,true,false,false,false,false,false,false,true,false,true,false,true,true,false,true,false,true,true,true,true,true,true,true,true,false,true,false,true,true,false,true,false,false,false,false,false,false,false,false,false,false,true,false,true,true,false,true,true,true,true,true,true,true,true,true,true,true,true,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]
 
-    var levels = [level1, level2];
+    const level3 = [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+
+    const level4 = [true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,true,true,true,true,true,true,true,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,true,false,true,true,true,true,true,true,false,false,false,false,false,false,true,false,true,false,true,false,false,false,false,false,false,false,false,false,false,false,true,false,true,false,true,false,false,false,false,false,true,true,true,true,false,false,true,false,true,false,true,false,false,false,false,false,false,false,false,true,false,false,true,false,true,false,true,false,false,false,false,false,false,false,false,true,false,false,true,false,true,false,true,false,false,false,false,false,false,false,false,true,false,false,true,false,true,false,true,false,false,false,false,false,false,false,false,true,false,false,true,false,true,false,true,false,false,false,false,false,true,true,true,true,false,false,true,false,true,false,true,false,false,false,false,false,false,false,false,false,false,false,true,false,true,false,true,true,true,true,true,true,false,false,false,false,false,false,true,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,true,false,false,false,false,false,false,false,true,true,true,true,true,true,true,false,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false]
+
+    const level5 = [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,true,true,false,false,false,false,true,true,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,true,true,false,false,false,false,true,true,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+
+    level6 = [false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true,false,true]
+
+    level7 = [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+
+    level8 = [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,true,true,true,true,true,true,true,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]
+
+    var levels = [level1, level2, level3, level4, level5, level6, level7, level8];
 
     createBoard()
 
@@ -57,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function levelWin()
     {
-        window.alert("You solved the level!");
+        window.alert("You solved the level! On to the next one.");
         //load next level:
         currentLevelIndex++;
         document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
@@ -73,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var selectionBox;
     var newCheckboxAmt;
     var removedCheckboxAmt;
+    var selectionBoxEnabled = true;
     var inputs;
     var originalInputValues = [];
     var alreadySelected = []
@@ -87,8 +102,12 @@ document.addEventListener('DOMContentLoaded', () =>
     document.addEventListener('mouseup', mouseUp);
     document.addEventListener('keydown', keyDown);
     document.addEventListener('keyup', keyUp);
-    document.getElementById("reset").addEventListener('click', resetLevel);
-    document.getElementById("done").addEventListener('click', checkLevelWin);
+    resetButton.addEventListener('click', resetLevel);
+    doneButton.addEventListener('click', checkLevelWin);
+    resetButton.addEventListener('mouseleave', enableSelectionBox);
+    doneButton.addEventListener('mouseleave', enableSelectionBox);
+    resetButton.addEventListener('mouseover', disableSelectionBox);
+    doneButton.addEventListener('mouseover', disableSelectionBox);
 
     function keyDown(event)
     {
@@ -109,13 +128,16 @@ document.addEventListener('DOMContentLoaded', () =>
     // - selectionBox box is created
     function mouseDown(event) 
     {
-        inputs = document.getElementsByTagName('input');
-        setOriginalInputValues();
-        setAlreadySelectedArray();
-        createSelectionBox(event);
-        newCheckboxAmt = 0;
-        removedCheckboxAmt = 0;
-        ismousedown = true;
+        if(selectionBoxEnabled)
+        {
+            inputs = document.getElementsByTagName('input');
+            setOriginalInputValues();
+            setAlreadySelectedArray();
+            createSelectionBox(event);
+            newCheckboxAmt = 0;
+            removedCheckboxAmt = 0;
+            ismousedown = true;
+        }
     }
     
     function mouseMove(event) 
@@ -129,19 +151,32 @@ document.addEventListener('DOMContentLoaded', () =>
     
     function mouseUp(event) 
     {
-        ismousedown = false;
-        console.log(newCheckboxAmt);
-        if(selectionDoesNotSatisfyRules() && !editMode) //it's possible that this doesn't solve the problem correctly
+        if(ismousedown)
         {
-            setBoardToBeforeSelect();
+            ismousedown = false;
+            console.log(newCheckboxAmt);
+            if(selectionDoesNotSatisfyRules() && !editMode) //it's possible that this doesn't solve the problem correctly
+            {
+                setBoardToBeforeSelect();
+            }
+            selectionBox.remove();
+            logBoardState();
         }
-        selectionBox.remove();
-        logBoardState();
     }
 
     function selectionDoesNotSatisfyRules()
     {
         return (newCheckboxAmt < 4 || removedCheckboxAmt < 4) && boxesStillChecked();
+    }
+
+    function disableSelectionBox()
+    {
+        selectionBoxEnabled = false;
+    }
+
+    function enableSelectionBox()
+    {
+        selectionBoxEnabled = true;
     }
 
     function boxesStillChecked()
@@ -154,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () =>
         return false;
     }
 
-    function checkRandomInputs()
+    function checkRandomBoxes()
     {
         inputs = document.getElementsByTagName('input');
         for(let i = 0; i < width*width; i++)
@@ -220,6 +255,20 @@ document.addEventListener('DOMContentLoaded', () =>
                         removedCheckboxAmt++;
                     }
                     
+                }
+            }
+            else if(alreadySelected[i])
+            {
+                alreadySelected[i] = false;
+                if(originalInputValues[i] == false)
+                {
+                    inputs[i].checked = false;
+                    newCheckboxAmt--;
+                }
+                else
+                {
+                    inputs[i].checked = true;
+                    removedCheckboxAmt--
                 }
             }
         }
