@@ -20,30 +20,53 @@
 
 .grid 
 {
+    padding: 10px;
     display: flex;
     flex-wrap: wrap;
     width: 400px;
     height: 400px;
-    margin-left: 13px;
 }
 
 .grid input
 {
+    opacity: 0;
     width: 22px;
     height: 22px;
-    background-color:gainsboro;
-    font-size: 60px;
-    text-align: center;
-    font-weight: bold;
     margin: 1px;
+}
+
+input, label
+{
+    display: block;
 }
 
 .level
 {
     font-family: Arial, Helvetica, sans-serif;
+    margin-top: 10px;
+    display: block;
 }
 
-.buttons
+.checkmark
 {
-    z-index: -1;
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 22px;
+    background-color: whitesmoke;
+    border-radius: 5px;
+    margin: 1px;
+    margin-left: -23px;
+}
+
+.trap
+{
+    position: relative;
+    display: block;
+    width: 22px;
+    height: 22px;
+    background-color: indianred;
+    border-radius: 5px;
+    margin: 1px;
+    margin-left: -23px;
 }
