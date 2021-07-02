@@ -3,6 +3,9 @@
     <head>
         <meta charset="utf-8">
         <title>Shift Select</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com"> 
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&family=Tourney:ital,wght@1,100&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
         <script src="levels.js" charset="utf-8"></script>
         <script src="app.js" charset="utf-8"></script>
@@ -10,20 +13,17 @@
     <body>
         <center>
         <div class="wrapper">
+            <p class="title">Shift Select</p>
             <span id="level" class="level">Level 1</span>
 
             <div class="grid"></div>
 
             <div class="buttons">
                 <button type="button" id="reset">Reset</button>
+                <button type="button" id="help">Help</button>
                 <button type="button" id="done">Done</button>
             </div>
-            <p>
-                e: toggle edit mode<br>
-                t: toggle traps edit mode<br>
-                c: clear board<br>
-                r: reset level
-            </p>
+            <p id="help-text"></p>
         </div>
         </center>
     </body>

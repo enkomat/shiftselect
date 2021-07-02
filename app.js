@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () =>
     const resultDisplay = document.getElementById('result');
     const resetButton = document.getElementById('reset');
     const doneButton = document.getElementById('done');
+    const helpButton = document.getElementById('help');
     const width = 16;
     var squares = [];
     var squareRects = [];
@@ -52,6 +53,14 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 labels[i].style.backgroundColor = "whitesmoke";
             }
+        }
+    }
+
+    function turnAllSquaresYellow()
+    {
+        for(let i=0; i < width*width; i++)
+        {
+            labels[i].style.backgroundColor = 'gold';
         }
     }
 
@@ -130,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function levelWin()
     {
-        window.alert("You solved the level! On to the next one.");
         //load next level:
         currentLevelIndex++;
         document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
@@ -140,7 +148,12 @@ document.addEventListener('DOMContentLoaded', () =>
     function checkLevelWin()
     {
         if(!boxesStillChecked() && !boardHasTraps()) levelWin();
-        else window.alert("You haven't cleared the board yet!");
+    }
+
+    function createHelpText()
+    {
+        document.getElementById("help-text").innerHTML =
+        "Your goal is to remove all the green squares by clicking and dragging your mouse, selecting them. <br> There are two rules that must be met with each selection: <br> 1. You must remove at least four old squares. <br> 2. You must create at least four new squares. <br> Press the 'Done' button when there are no green squares left."
     }
 
     var selectionBox;
@@ -166,10 +179,13 @@ document.addEventListener('DOMContentLoaded', () =>
     document.addEventListener('keyup', keyUp);
     resetButton.addEventListener('click', resetLevel);
     doneButton.addEventListener('click', checkLevelWin);
+    helpButton.addEventListener('click', createHelpText)
     resetButton.addEventListener('mouseleave', enableSelectionBox);
     doneButton.addEventListener('mouseleave', enableSelectionBox);
+    helpButton.addEventListener('mouseleave', enableSelectionBox);
     resetButton.addEventListener('mouseover', disableSelectionBox);
     doneButton.addEventListener('mouseover', disableSelectionBox);
+    helpButton.addEventListener('mouseover', disableSelectionBox);
 
     function keyDown(event)
     {
@@ -225,6 +241,10 @@ document.addEventListener('DOMContentLoaded', () =>
             if(!boxesStillChecked() && boardHasTraps()) 
             {
                 turnTrapsToDefaultSquares();
+            }
+            else if(!boxesStillChecked() && !boardHasTraps())
+            {
+                turnAllSquaresYellow();
             }
             selectionBox.remove();
             //logBoardState();
@@ -419,8 +439,6 @@ document.addEventListener('DOMContentLoaded', () =>
         }
         xString = dX.toString() + 'px';
         yString = dY.toString() + 'px';
-        selectionBox.style.border = '1px dashed #ccc';
-        selectionBox.style.display = 'block';
         selectionBox.style.width = xString;
         selectionBox.style.height = yString;
     }
