@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var squareRects = [];
     var labels = [];
     var checkedSquareAmt = 10;
-    var currentLevelIndex = 1;
+    var currentLevelIndex = 0;
 
     createBoard()
 
@@ -40,7 +40,11 @@ document.addEventListener('DOMContentLoaded', () =>
         for (let i=0; i < width*width; i++)
         {
             inputs[i].checked = boardArray[i];
-            if(boardArray[i] == true) 
+            if(trapInSquareIndex(i))
+            {
+                labels[i].style.backgroundColor = "indianred"
+            }
+            else if(boardArray[i] == true) 
             {
                 labels[i].style.backgroundColor = "lightgreen";
             }
@@ -48,12 +52,32 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 labels[i].style.backgroundColor = "whitesmoke";
             }
+        }
+    }
 
+    function turnTrapsToDefaultSquares()
+    {
+        var newSquares = []
+        for(let i=0; i < width*width; i++)
+        {
             if(trapInSquareIndex(i))
             {
-                labels[i].style.backgroundColor = "indianred"
+                inputs[i].checked = true;
+                labels[i].style.backgroundColor = "lightgreen";
+                originalInputValues[i] = true;
+                newSquares.push(inputs[i].checked);
+            }
+            else
+            {
+                inputs[i].checked = false;
+                labels[i].style.backgroundColor = "whitesmoke";
+                originalInputValues[i] = false;
+                newSquares.push(inputs[i].checked);
             }
         }
+        levelTrapPositions[currentLevelIndex] = []
+        levels[currentLevelIndex] = newSquares;
+        console.log("turnTrapsToDefaultSquaresm called")
     }
 
     function trapInSquareIndex(squareIndex)
@@ -61,10 +85,19 @@ document.addEventListener('DOMContentLoaded', () =>
         //this could be more efficient
         for(let i=0; i < levelTrapPositions[currentLevelIndex].length; i++)
         {
-            if(levelTrapPositions[currentLevelIndex] == squareIndex)
+            if(levelTrapPositions[currentLevelIndex][i] == squareIndex)
             {
                 return true;
             }
+        }
+        return false;
+    }
+
+    function boardHasTraps()
+    {
+        for(let i=0; i < width*width; i++)
+        {
+            if(trapInSquareIndex(i)) return true;
         }
         return false;
     }
@@ -87,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () =>
             labels[i].style.backgroundColor = "whitesmoke";
         }
         currentTrapsArray = [];
+        levelTrapPositions[currentLevelIndex] = []
     }
 
     function resetLevel()
@@ -105,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function checkLevelWin()
     {
-        if(!boxesStillChecked()) levelWin();
+        if(!boxesStillChecked() && !boardHasTraps()) levelWin();
         else window.alert("You haven't cleared the board yet!");
     }
 
@@ -188,9 +222,13 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 setBoardToBeforeSelect();
             }
+            if(!boxesStillChecked() && boardHasTraps()) 
+            {
+                turnTrapsToDefaultSquares();
+            }
             selectionBox.remove();
-            logBoardState();
-            logTraps();
+            //logBoardState();
+            //logTraps();
         }
     }
 
@@ -276,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function logTraps()
     {
+        currentTrapsArray.sort();
         var jsonArray = JSON.stringify(currentTrapsArray);
         console.log(jsonArray);
     }
