@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var squareRects = [];
     var labels = [];
     var checkedSquareAmt = 10;
-    var currentLevelIndex = 7;
+    var currentLevelIndex = 1;
 
     createBoard()
 
@@ -59,12 +59,21 @@ document.addEventListener('DOMContentLoaded', () =>
     function trapInSquareIndex(squareIndex)
     {
         //this could be more efficient
-        for(let i=0; i < level8TrapPositions.length; i++)
+        for(let i=0; i < levelTrapPositions[currentLevelIndex].length; i++)
         {
-            if(level8TrapPositions[i] == squareIndex)
+            if(levelTrapPositions[currentLevelIndex] == squareIndex)
             {
                 return true;
             }
+        }
+        return false;
+    }
+
+    function trapInSelectionArea()
+    {
+        for(let i=0; i < currentlySelectedSquares.length; i++)
+        {
+            if(currentlySelectedSquares[i] && trapInSquareIndex(i)) return true;
         }
         return false;
     }
@@ -75,7 +84,9 @@ document.addEventListener('DOMContentLoaded', () =>
         for (let i=0; i < width*width; i++)
         {
             inputs[i].checked = false;
+            labels[i].style.backgroundColor = "whitesmoke";
         }
+        currentTrapsArray = [];
     }
 
     function resetLevel()
@@ -105,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var inputs;
     var labels;
     var originalInputValues = [];
-    var alreadySelected = []
+    var currentlySelectedSquares = []
     var x;
     var y;
     var finX;
@@ -113,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var ismousedown = false;
     var editMode = false;
     var editTrapsMode = false;
+    var currentTrapsArray = []
     document.addEventListener('mousedown', mouseDown);
     document.addEventListener('mousemove', mouseMove);
     document.addEventListener('mouseup', mouseUp);
@@ -145,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () =>
     // - selectionBox box is created
     function mouseDown(event) 
     {
-        if(selectionBoxEnabled)
+        if(selectionBoxEnabled) //this makes buttons easier to press
         {
             inputs = document.getElementsByTagName('input');
             setOriginalInputValues();
@@ -178,12 +190,13 @@ document.addEventListener('DOMContentLoaded', () =>
             }
             selectionBox.remove();
             logBoardState();
+            logTraps();
         }
     }
 
     function selectionDoesNotSatisfyRules()
     {
-        return (newCheckboxAmt < 4 || removedCheckboxAmt < 4) && boxesStillChecked();
+        return (newCheckboxAmt < 4 || removedCheckboxAmt < 4 || trapInSelectionArea()) && boxesStillChecked();
     }
 
     function disableSelectionBox()
@@ -201,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () =>
         inputs = document.getElementsByTagName('input');
         for(let i = 0; i < width*width; i++)
         {
-            if(inputs[i].checked) return true;
+            if(inputs[i].checked && !trapInSquareIndex(i)) return true;
         }
         return false;
     }
@@ -233,6 +246,11 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 labels[i].style.backgroundColor = "whitesmoke";
             }
+
+            if(trapInSquareIndex(i))
+            {
+                labels[i].style.backgroundColor = "indianred"
+            }
         }
     }
 
@@ -240,19 +258,25 @@ document.addEventListener('DOMContentLoaded', () =>
     {
         for(let i = 0; i < width*width; i++)
         {
-            alreadySelected[i] = false;
+            currentlySelectedSquares[i] = false;
         }
     }
 
     function logBoardState()
     {
         inputs = document.getElementsByTagName('input');
-        var checkedArray = []
+        var checkedArray = [];
         for(let i = 0; i < width*width; i++)
         {
             checkedArray.push(inputs[i].checked);
         }
-        var jsonArray = JSON.stringify(checkedArray)
+        var jsonArray = JSON.stringify(checkedArray);
+        console.log(jsonArray);
+    }
+
+    function logTraps()
+    {
+        var jsonArray = JSON.stringify(currentTrapsArray);
         console.log(jsonArray);
     }
 
@@ -266,9 +290,13 @@ document.addEventListener('DOMContentLoaded', () =>
             && selectionRect.left < inputs[i].getBoundingClientRect().right
             && selectionRect.top < inputs[i].getBoundingClientRect().bottom)
             {
-                if(!alreadySelected[i])
+                if(trapInSquareIndex(i)) //traps cannot be interacted with
                 {
-                    alreadySelected[i] = true;
+                    currentlySelectedSquares[i] = true;
+                }
+                else if(!currentlySelectedSquares[i])
+                {
+                    currentlySelectedSquares[i] = true;
                     if(originalInputValues[i] == false)
                     {
                         inputs[i].checked = true;
@@ -285,13 +313,18 @@ document.addEventListener('DOMContentLoaded', () =>
                     if(editTrapsMode)
                     {
                         labels[i].style.backgroundColor = "indianred";
+                        currentTrapsArray.push(i);
                     }
                 }
             }
-            else if(alreadySelected[i])
+            else if(currentlySelectedSquares[i])
             {
-                alreadySelected[i] = false;
-                if(originalInputValues[i] == false)
+                currentlySelectedSquares[i] = false;
+                if(trapInSquareIndex(i)) //traps cannot be interacted with
+                {
+                    currentlySelectedSquares[i] = false;
+                }
+                else if(originalInputValues[i] == false)
                 {
                     inputs[i].checked = false;
                     labels[i].style.backgroundColor = "whitesmoke";
