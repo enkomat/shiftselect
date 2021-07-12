@@ -6,14 +6,13 @@ document.addEventListener('DOMContentLoaded', () =>
     const resetButton = document.getElementById('reset');
     const doneButton = document.getElementById('done');
     const helpButton = document.getElementById('help');
+    const undoButton = document.getElementById('undo');
     const width = 16;
     var squares = [];
     var squareRects = [];
     var labels = [];
     var checkedSquareAmt = 10;
-    var currentLevelIndex = 0;
-
-    createBoard()
+    var currentLevelIndex = 8;
 
     //create a playing board
     function createBoard()
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () =>
             squares.push(square);
             squareRects.push(square.getBoundingClientRect());
         }
-        setBoardState(levels[currentLevelIndex]);
     }
 
     function setBoardState(boardArray)
@@ -86,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () =>
         }
         levelTrapPositions[currentLevelIndex] = []
         levels[currentLevelIndex] = newSquares;
-        console.log("turnTrapsToDefaultSquaresm called")
     }
 
     function trapInSquareIndex(squareIndex)
@@ -132,9 +129,21 @@ document.addEventListener('DOMContentLoaded', () =>
         levelTrapPositions[currentLevelIndex] = []
     }
 
-    function resetLevel()
+    function initLevel()
     {
         setBoardState(levels[currentLevelIndex]);
+        maximumMoveAmt = levelMoveAmounts[currentLevelIndex];
+        currentMoveAmt = maximumMoveAmt; //moves are subtracted until player hits zero
+        updateMovesElement();
+        document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
+    }
+
+    function resetLevel()
+    {
+        pastBoardStates = [];
+        setBoardState(levels[currentLevelIndex]);
+        currentMoveAmt = maximumMoveAmt;
+        updateMovesElement();
     }
 
     function levelWin()
@@ -143,11 +152,12 @@ document.addEventListener('DOMContentLoaded', () =>
         currentLevelIndex++;
         document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
         setBoardState(levels[currentLevelIndex]);
+        initLevel();
     }
 
     function checkLevelWin()
     {
-        if(!boxesStillChecked() && !boardHasTraps()) levelWin();
+        if(!boxesStillChecked()) levelWin();
     }
 
     function createHelpText()
@@ -156,6 +166,9 @@ document.addEventListener('DOMContentLoaded', () =>
         "Your goal is to remove all the green squares by clicking and dragging your mouse, selecting them. <br> There are two rules that must be met with each selection: <br> 1. You must remove at least four old squares. <br> 2. You must create at least four new squares. <br> Press the 'Done' button when there are no green squares left."
     }
 
+    var maximumMoveAmt = 0;
+    var currentMoveAmt = 0;
+    var pastBoardStates = [];
     var selectionBox;
     var newCheckboxAmt;
     var removedCheckboxAmt;
@@ -172,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var editMode = false;
     var editTrapsMode = false;
     var currentTrapsArray = []
+    
     document.addEventListener('mousedown', mouseDown);
     document.addEventListener('mousemove', mouseMove);
     document.addEventListener('mouseup', mouseUp);
@@ -180,12 +194,15 @@ document.addEventListener('DOMContentLoaded', () =>
     resetButton.addEventListener('click', resetLevel);
     doneButton.addEventListener('click', checkLevelWin);
     helpButton.addEventListener('click', createHelpText)
+    undoButton.addEventListener('click', undoMove);
     resetButton.addEventListener('mouseleave', enableSelectionBox);
     doneButton.addEventListener('mouseleave', enableSelectionBox);
     helpButton.addEventListener('mouseleave', enableSelectionBox);
+    undoButton.addEventListener('mouseleave', enableSelectionBox);
     resetButton.addEventListener('mouseover', disableSelectionBox);
     doneButton.addEventListener('mouseover', disableSelectionBox);
     helpButton.addEventListener('mouseover', disableSelectionBox);
+    undoButton.addEventListener('mouseover', disableSelectionBox);
 
     function keyDown(event)
     {
@@ -207,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () =>
     // - selectionBox box is created
     function mouseDown(event) 
     {
-        if(selectionBoxEnabled) //this makes buttons easier to press
+        if(selectionBoxEnabled && currentMoveAmt != 0) //this makes buttons easier to press
         {
             inputs = document.getElementsByTagName('input');
             setOriginalInputValues();
@@ -233,18 +250,16 @@ document.addEventListener('DOMContentLoaded', () =>
         if(ismousedown)
         {
             ismousedown = false;
-            console.log(newCheckboxAmt);
             if(selectionDoesNotSatisfyRules() && !editMode) //it's possible that this doesn't solve the problem correctly
             {
                 setBoardToBeforeSelect();
             }
-            if(!boxesStillChecked() && boardHasTraps()) 
+            else
             {
-                turnTrapsToDefaultSquares();
-            }
-            else if(!boxesStillChecked() && !boardHasTraps())
-            {
-                turnAllSquaresYellow();
+                savePreviousBoardState();
+                if(!boxesStillChecked()) turnAllSquaresYellow();
+                currentMoveAmt--;
+                updateMovesElement();
             }
             selectionBox.remove();
             //logBoardState();
@@ -252,9 +267,21 @@ document.addEventListener('DOMContentLoaded', () =>
         }
     }
 
+    window.oncontextmenu = function ()
+    {
+        selectionBox.remove();
+        return false; // cancel default menu, so no checkboxes are drawn in a weird way
+    }
+
+    function updateMovesElement()
+    {
+        document.getElementById("move-amount").innerHTML = "Moves: " + currentMoveAmt + "/" + maximumMoveAmt;
+    }
+
+
     function selectionDoesNotSatisfyRules()
     {
-        return (newCheckboxAmt < 4 || removedCheckboxAmt < 4 || trapInSelectionArea()) && boxesStillChecked();
+        return (newCheckboxAmt < 1 || removedCheckboxAmt < 1 || trapInSelectionArea()) && boxesStillChecked();
     }
 
     function disableSelectionBox()
@@ -288,6 +315,26 @@ document.addEventListener('DOMContentLoaded', () =>
                 inputs[i].checked = true;
                 checkedSquareAmt++;
             }
+        }
+    }
+
+    function savePreviousBoardState()
+    {
+        previousBoardState = []
+        for(let i = 0; i < width*width; i++)
+        {
+            previousBoardState.push(originalInputValues[i]);
+        }
+        pastBoardStates.push(previousBoardState);
+    }
+
+    function undoMove()
+    {
+        if(currentMoveAmt < maximumMoveAmt)
+        {
+            currentMoveAmt++;
+            updateMovesElement();
+            setBoardState(pastBoardStates.pop());
         }
     }
 
@@ -442,4 +489,7 @@ document.addEventListener('DOMContentLoaded', () =>
         selectionBox.style.width = xString;
         selectionBox.style.height = yString;
     }
+    
+    createBoard();
+    initLevel();
 })
