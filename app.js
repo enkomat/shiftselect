@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var squareRects = [];
     var labels = [];
     var checkedSquareAmt = 10;
-    var currentLevelIndex = 8;
+    var currentLevelIndex = 0;
 
     //create a playing board
     function createBoard()
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () =>
     function createHelpText()
     {
         document.getElementById("help-text").innerHTML =
-        "Your goal is to remove all the green squares by clicking and dragging your mouse, selecting them. <br> There are two rules that must be met with each selection: <br> 1. You must remove at least four old squares. <br> 2. You must create at least four new squares. <br> Press the 'Done' button when there are no green squares left."
+        "Your goal is to remove all the green squares by clicking and dragging your mouse, selecting them. <br> There are two rules that must be met with each selection: <br> 1. You must remove at least one green square. <br> 2. You must create at least one new square. <br> The amount of moves you have per level is limited and is located under the board. Press the 'Done' button when there are no green squares left."
     }
 
     var maximumMoveAmt = 0;
