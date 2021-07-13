@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () =>
     const doneButton = document.getElementById('done');
     const helpButton = document.getElementById('help');
     const undoButton = document.getElementById('undo');
+    const nextLevelButton = document.getElementById('next-level');
+    const lastLevelButton = document.getElementById('last-level');
     const width = 16;
     var squares = [];
     var squareRects = [];
@@ -146,24 +148,15 @@ document.addEventListener('DOMContentLoaded', () =>
         updateMovesElement();
     }
 
-    function levelWin()
-    {
-        //load next level:
-        currentLevelIndex++;
-        document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
-        setBoardState(levels[currentLevelIndex]);
-        initLevel();
-    }
-
     function checkLevelWin()
     {
-        if(!boxesStillChecked()) levelWin();
+        if(!boxesStillChecked()) moveToNextLevel();
     }
 
     function createHelpText()
     {
         document.getElementById("help-text").innerHTML =
-        "Your goal is to remove all the green squares by clicking and dragging your mouse, selecting them. <br> There are two rules that must be met with each selection: <br> 1. You must remove at least one green square. <br> 2. You must create at least one new square. <br> The amount of moves you have per level is limited and is located under the board. Press the 'Done' button when there are no green squares left."
+        "Your goal is to remove all green squares by clicking and dragging your mouse over them. <br> There are two rules that must be met with each selection you make: <br> 1. You must remove at least one green square. <br> 2. You must create at least one new square. <br> The amount of moves you have per level is limited and is located under the board. Press the 'Done' button when there are no green squares left."
     }
 
     var maximumMoveAmt = 0;
@@ -195,14 +188,20 @@ document.addEventListener('DOMContentLoaded', () =>
     doneButton.addEventListener('click', checkLevelWin);
     helpButton.addEventListener('click', createHelpText)
     undoButton.addEventListener('click', undoMove);
+    nextLevelButton.addEventListener('click', moveToNextLevel);
+    lastLevelButton.addEventListener('click', moveToLastLevel);
     resetButton.addEventListener('mouseleave', enableSelectionBox);
     doneButton.addEventListener('mouseleave', enableSelectionBox);
     helpButton.addEventListener('mouseleave', enableSelectionBox);
     undoButton.addEventListener('mouseleave', enableSelectionBox);
+    nextLevelButton.addEventListener('mouseleave', enableSelectionBox);
+    lastLevelButton.addEventListener('mouseleave', enableSelectionBox);
     resetButton.addEventListener('mouseover', disableSelectionBox);
     doneButton.addEventListener('mouseover', disableSelectionBox);
     helpButton.addEventListener('mouseover', disableSelectionBox);
     undoButton.addEventListener('mouseover', disableSelectionBox);
+    nextLevelButton.addEventListener('mouseover', disableSelectionBox);
+    lastLevelButton.addEventListener('mouseover', disableSelectionBox);
 
     function keyDown(event)
     {
@@ -257,9 +256,13 @@ document.addEventListener('DOMContentLoaded', () =>
             else
             {
                 savePreviousBoardState();
-                if(!boxesStillChecked()) turnAllSquaresYellow();
                 currentMoveAmt--;
                 updateMovesElement();
+                if(!boxesStillChecked()) 
+                {
+                    document.getElementById("move-amount").innerHTML = "Level solved! Press done to move to the next level."
+                    document.getElementById("move-amount").style.color = "green"
+                }
             }
             selectionBox.remove();
             //logBoardState();
@@ -276,6 +279,14 @@ document.addEventListener('DOMContentLoaded', () =>
     function updateMovesElement()
     {
         document.getElementById("move-amount").innerHTML = "Moves: " + currentMoveAmt + "/" + maximumMoveAmt;
+        if(currentMoveAmt == 0)
+        {
+            document.getElementById("move-amount").style.color = "red";
+        }
+        else
+        {
+            document.getElementById("move-amount").style.color = "black";
+        }
     }
 
 
@@ -326,6 +337,23 @@ document.addEventListener('DOMContentLoaded', () =>
             previousBoardState.push(originalInputValues[i]);
         }
         pastBoardStates.push(previousBoardState);
+    }
+
+    function moveToNextLevel()
+    {
+        currentLevelIndex++;
+        document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
+        setBoardState(levels[currentLevelIndex]);
+        initLevel();
+    }
+
+    function moveToLastLevel()
+    {
+        if(currentLevelIndex == 0) return;
+        currentLevelIndex--;
+        document.getElementById("level").innerHTML = "Level " + (currentLevelIndex+1);
+        setBoardState(levels[currentLevelIndex]);
+        initLevel();
     }
 
     function undoMove()
