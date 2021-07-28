@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var squareRects = [];
     var labels = [];
     var checkedSquareAmt = 10;
-    var currentLevelIndex = 10;
+    var currentLevelIndex = 12;
 
     //create a playing board
     function createBoard()
@@ -37,79 +37,45 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function setBoardState(boardArray)
     {
+        if(boardArray[0] == true || boardArray[0] == false)
+        {
+            console.log(boardArray[0]);
+            buildBoardFromBooleans(boardArray);
+        }
+        else
+        {
+            buildBoardFromColors(boardArray);
+        }
+    }
+
+    function buildBoardFromColors(boardArray)
+    {
+        for (let i=0; i < width*width; i++)
+        {
+            labels[i].style.backgroundColor = boardArray[i];
+        }
+    }
+
+    function buildBoardFromBooleans(boardArray)
+    {
         inputs = document.getElementsByTagName('input');
         for (let i=0; i < width*width; i++)
         {
-            
-
             inputs[i].checked = boardArray[i];
             if(boardArray[i] == true) 
             {
-                labels[i].style.backgroundColor = "lightgreen";
+                labels[i].style.backgroundColor = colors.GREEN;
             }
             else if(boardArray[i] == false)
             {
-                labels[i].style.backgroundColor = "whitesmoke";
+                labels[i].style.backgroundColor = colors.GREY;
                 //these ifs here so green squares can overwrite them when pressing undo, because this function is called from undoMove as well. there could be a better solution.
-                if(trapInSquareIndex(i))
+                if(fillableInSquareIndex(i))
                 {
-                    labels[i].style.backgroundColor = "indianred"
-                }
-                else if(fillableInSquareIndex(i))
-                {
-                    labels[i].style.backgroundColor = "lightskyblue"
+                    labels[i].style.backgroundColor = colors.BLUE;
                 }
             }
         }
-    }
-
-    function turnAllSquaresYellow()
-    {
-        for(let i=0; i < width*width; i++)
-        {
-            labels[i].style.backgroundColor = 'lightskyblue';
-        }
-    }
-
-    function turnTrapsToDefaultSquares()
-    {
-        var newSquares = []
-        for(let i=0; i < width*width; i++)
-        {
-            if(trapInSquareIndex(i))
-            {
-                inputs[i].checked = true;
-                labels[i].style.backgroundColor = "lightgreen";
-                originalInputValues[i] = true;
-                newSquares.push(inputs[i].checked);
-            }
-            else
-            {
-                inputs[i].checked = false;
-                if(fillableInSquareIndex(i)) labels[i].style.backgroundColor = "lightskyblue";
-                else labels[i].style.backgroundColor = "whitesmoke";
-                originalInputValues[i] = false;
-                newSquares.push(inputs[i].checked);
-            }
-        }
-        levelTrapPositions[currentLevelIndex] = []
-        levels[currentLevelIndex] = newSquares;
-    }
-
-    function fillableAreaFilledCorrectly()
-    {
-        for(let i=0; i < width*width; i++)
-        {
-            if(fillableInSquareIndex(i) && inputs[i].checked == false)
-            {
-                return false
-            }
-            else if(!fillableInSquareIndex(i) && inputs[i].checked == true)
-            {
-                return false;
-            }
-        }
-        return true;
     }
 
     function fillableInSquareIndex(squareIndex)
@@ -124,44 +90,13 @@ document.addEventListener('DOMContentLoaded', () =>
         return false;
     }
 
-    function trapInSquareIndex(squareIndex)
-    {
-        //this could be more efficient
-        for(let i=0; i < levelTrapPositions[currentLevelIndex].length; i++)
-        {
-            if(levelTrapPositions[currentLevelIndex][i] == squareIndex)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function boardHasTraps()
-    {
-        for(let i=0; i < width*width; i++)
-        {
-            if(trapInSquareIndex(i)) return true;
-        }
-        return false;
-    }
-
-    function trapInSelectionArea()
-    {
-        for(let i=0; i < currentlySelectedSquares.length; i++)
-        {
-            if(currentlySelectedSquares[i] && trapInSquareIndex(i)) return true;
-        }
-        return false;
-    }
-
     function clearBoard()
     {
         inputs = document.getElementsByTagName('input');
         for (let i=0; i < width*width; i++)
         {
             inputs[i].checked = false;
-            labels[i].style.backgroundColor = "whitesmoke";
+            labels[i].style.backgroundColor = colors.GREY;
         }
         currentTrapsArray = [];
         currentFillablesArray = [];
@@ -187,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function checkLevelWin()
     {
-        if(!boxesStillChecked()) moveToNextLevel();
+        if(boardEmpty()) moveToNextLevel();
     }
 
     function createHelpText()
@@ -238,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () =>
     document.addEventListener('mousemove', mouseMove);
     document.addEventListener('mouseup', mouseUp);
     document.addEventListener('keydown', keyDown);
-    document.addEventListener('keyup', keyUp);
     resetButton.addEventListener('click', resetLevel);
     doneButton.addEventListener('click', checkLevelWin);
     helpButton.addEventListener('click', createHelpText)
@@ -257,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () =>
     undoButton.addEventListener('mouseover', disableSelectionBox);
     nextLevelButton.addEventListener('mouseover', disableSelectionBox);
     lastLevelButton.addEventListener('mouseover', disableSelectionBox);
+
     function keyDown(event)
     {
         if(event.key == "e") editMode = !editMode;
@@ -268,11 +203,6 @@ document.addEventListener('DOMContentLoaded', () =>
         if(event.key == "c") clearBoard();
         //reset current level:
         if(event.key == "r") resetLevel();
-    }
-
-    function keyUp(event)
-    {
-        //if(event.key == "e") editMode = false;
     }
     
     // when you press mouse down:
@@ -314,16 +244,18 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 if(selectionDoesNotSatisfyRules()) //it's possible that this doesn't solve the problem correctly
                 {
+                    console.log("set board to before select")
                     setBoardToBeforeSelect();
                 }
                 else
                 {
+                    console.log("made a move")
                     currentMoveAmt--;
                     updateMovesElement();
-                    if(!colorStillExists(colors.GREEN) && !colorStillExists(colors.BLUE)) 
+                    if(boardEmpty()) 
                     {
                         document.getElementById("move-amount").innerHTML = "Level solved! Press done to move to the next level."
-                        document.getElementById("move-amount").style.color = "green"
+                        document.getElementById("move-amount").style.color = "green";
                     }
                 }
             }
@@ -334,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () =>
             originalSelectionColor = colors.NONE;
             currentlySelectedSquares = [];
             ismousedown = false;
+            logBoardColors();
             selectionBox.remove();
         }
     }
@@ -359,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     function selectionDoesNotSatisfyRules()
     {
-        return (newCheckboxAmt < 1 || removedCheckboxAmt < 1 || wrongColorAmt > 0) && colorStillExists(originalSelectionColor);
+        return (newCheckboxAmt < 1 || removedCheckboxAmt < 1) && colorStillExists(originalSelectionColor);
     }
 
     function disableSelectionBox()
@@ -382,14 +315,13 @@ document.addEventListener('DOMContentLoaded', () =>
         return false;
     }
 
-    function boxesStillChecked()
+    function boardEmpty()
     {
-        inputs = document.getElementsByTagName('input');
         for(let i = 0; i < width*width; i++)
         {
-            if(inputs[i].checked && !trapInSquareIndex(i)) return true;
+            if(labels[i].style.backgroundColor != colors.GREY) return false;
         }
-        return false;
+        return true;
     }
 
     function checkRandomBoxes()
@@ -455,6 +387,7 @@ document.addEventListener('DOMContentLoaded', () =>
         {
             labels[i].style.backgroundColor = originalSquareColors[i];
         }
+        pastBoardStates.pop();
     }
 
     function setAlreadySelectedArray()
@@ -474,6 +407,17 @@ document.addEventListener('DOMContentLoaded', () =>
             checkedArray.push(inputs[i].checked);
         }
         var jsonArray = JSON.stringify(checkedArray);
+        console.log(jsonArray);
+    }
+
+    function logBoardColors()
+    {
+        var colorsArray = [];
+        for(let i = 0; i < width*width; i++)
+        {
+            colorsArray.push(labels[i].style.backgroundColor)
+        }
+        var jsonArray = JSON.stringify(colorsArray);
         console.log(jsonArray);
     }
 
@@ -503,10 +447,6 @@ document.addEventListener('DOMContentLoaded', () =>
     function changeSquareColor(i)
     {
         currentSelectionColor = labels[i].style.backgroundColor;
-        if(originalSelectionColor == colors.NONE)
-        {
-            originalSelectionColor = currentSelectionColor;
-        }
 
         //this exists so color of selection starting from grey changes based on what you selected last
         if(originalSelectionColor == colors.GREY)
@@ -527,21 +467,17 @@ document.addEventListener('DOMContentLoaded', () =>
             {
                 //turn current square grey
                 labels[i].style.backgroundColor = colors.GREY;
-                greenAmt--;
-                removedCheckboxAmt++;
             }
             else if(currentSelectionColor == colors.GREY)
             {
                 //turn current square green
                 labels[i].style.backgroundColor = colors.GREEN;
-                greenAmt++;
-                newCheckboxAmt++;
             }
             else if(currentSelectionColor == colors.BLUE)
             {
                 //touched blue, selection fails
-                labels[i].style.backgroundColor = colors.RED;
-                wrongColorAmt++;
+                //labels[i].style.backgroundColor = colors.RED;
+                //wrongColorAmt++;
             }
         }
         else if(originalSelectionColor == colors.BLUE)
@@ -549,22 +485,18 @@ document.addEventListener('DOMContentLoaded', () =>
             if(currentSelectionColor == colors.BLUE)
             {
                 //turn current square grey
-                labels[i].style.backgroundColor = colors.GREY;
-                blueAmt--;
-                removedCheckboxAmt++;
+                labels[i].style.backgroundColor = colors.GREY;       
             }
             else if(currentSelectionColor == colors.GREY)
             {
                 //turn current square blue
                 labels[i].style.backgroundColor = colors.BLUE;
-                blueAmt++;
-                newCheckboxAmt++;
             }
             else if(currentSelectionColor == colors.GREEN)
             {
                 //touched green, selection fails
-                labels[i].style.backgroundColor = colors.RED;
-                wrongColorAmt++;
+                //labels[i].style.backgroundColor = colors.RED;
+                //wrongColorAmt++;
             }
         }
     }
@@ -576,103 +508,33 @@ document.addEventListener('DOMContentLoaded', () =>
             var rectCollision = checkSelectionRectCollision(i);
             if(rectCollision && !currentlySelectedSquares[i])
             {
+                if(originalSelectionColor == colors.NONE)
+                {
+                    originalSelectionColor = labels[i].style.backgroundColor;
+                }
                 changeSquareColor(i);
+                if(labels[i].style.backgroundColor == colors.GREY)
+                {
+                    newCheckboxAmt++;
+                }
+                else if((originalSelectionColor == colors.BLUE && labels[i].style.backgroundColor == colors.BLUE) || (originalSelectionColor == colors.GREEN && labels[i].style.backgroundColor == colors.GREEN))
+                {
+                    removedCheckboxAmt++;
+                }
                 currentlySelectedSquares[i] = true;
             }
             else if(!rectCollision && currentlySelectedSquares[i])
             {
-                if(labels[i].style.backgroundColor == colors.RED)
+                if(labels[i].style.backgroundColor == colors.GREY)
                 {
-                    wrongColorAmt--;
+                    newCheckboxAmt--;
+                }
+                else if((originalSelectionColor == colors.BLUE && labels[i].style.backgroundColor == colors.BLUE) || (originalSelectionColor == colors.GREEN && labels[i].style.backgroundColor == colors.GREEN))
+                {
+                    removedCheckboxAmt--;
                 }
                 labels[i].style.backgroundColor = originalSquareColors[i];
                 currentlySelectedSquares[i] = false;
-            }
-        }
-    }
-
-    function checkIfOverSquare2() //change name of this function
-    {
-        selectionRect = selectionBox.getBoundingClientRect();
-        for(let i = 0; i < width*width; i++)
-        {
-            if(selectionRect.right > inputs[i].getBoundingClientRect().left
-            && selectionRect.bottom > inputs[i].getBoundingClientRect().top
-            && selectionRect.left < inputs[i].getBoundingClientRect().right
-            && selectionRect.top < inputs[i].getBoundingClientRect().bottom)
-            {
-                if(trapInSquareIndex(i)) //traps cannot be interacted with
-                {
-                    currentlySelectedSquares[i] = true;
-                }
-                else if(fillableInSquareIndex(i))
-                {
-                    labels[i].style.backgroundColor = "lightskyblue";
-                    currentFillablesArray.push(i);
-                    newCheckboxAmt++;
-                }
-                else if(!currentlySelectedSquares[i])
-                {
-                    currentlySelectedSquares[i] = true;
-                    if(editTrapsMode)
-                    {
-                        labels[i].style.backgroundColor = "indianred";
-                        currentTrapsArray.push(i);
-                    }
-                    else if(editWallsMode && !fillableInSquareIndex(i))
-                    {
-                        labels[i].style.backgroundColor = "lightskyblue";
-                        inputs[i].checked = false;
-                        currentFillablesArray.push(i);
-                    }
-                    else if(editWallsMode && fillableInSquareIndex(i))
-                    {
-                        labels[i].style.backgroundColor = "whitesmoke";
-                        inputs[i].checked = false;
-                        index = currentFillablesArray.indexOf(i);
-                        currentFillablesArray.splice(index, 1);
-                    }
-                    else if(originalInputValues[i] == false)
-                    {
-                        inputs[i].checked = true;
-                        labels[i].style.backgroundColor = "lightgreen";
-                        newCheckboxAmt++;
-                    }
-                    else
-                    {
-                        inputs[i].checked = false;
-                        if(fillableInSquareIndex(i)) labels[i].style.backgroundColor = "lightskyblue";
-                        else labels[i].style.backgroundColor = "whitesmoke";
-                        removedCheckboxAmt++;
-                    }
-                }
-            }
-            else if(currentlySelectedSquares[i])
-            {
-                currentlySelectedSquares[i] = false;
-                if(trapInSquareIndex(i)) //traps cannot be interacted with
-                {
-                    currentlySelectedSquares[i] = false;
-                }
-                else if(fillableInSquareIndex(i))
-                {
-                    inputs[i].checked = false;
-                    labels[i].style.backgroundColor = "lightskyblue";
-                    currentFillablesArray.push(i);
-                    newCheckboxAmt--;
-                }
-                else if(originalInputValues[i] == false)
-                {
-                    inputs[i].checked = false;
-                    labels[i].style.backgroundColor = "whitesmoke";
-                    newCheckboxAmt--;
-                }
-                else
-                {
-                    inputs[i].checked = true;
-                    labels[i].style.backgroundColor = "lightgreen";
-                    removedCheckboxAmt--
-                }
             }
         }
     }
