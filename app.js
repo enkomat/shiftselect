@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () =>
     var squareRects = [];
     var labels = [];
     var checkedSquareAmt = 10;
-    var currentLevelIndex = 12;
+    var currentLevelIndex = 0;
 
     //create a playing board
     function createBoard()
