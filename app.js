@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () =>
     {
         if(boardArray[0] == true || boardArray[0] == false)
         {
-            console.log(boardArray[0]);
             buildBoardFromBooleans(boardArray);
         }
         else
@@ -69,25 +68,8 @@ document.addEventListener('DOMContentLoaded', () =>
             else if(boardArray[i] == false)
             {
                 labels[i].style.backgroundColor = colors.GREY;
-                //these ifs here so green squares can overwrite them when pressing undo, because this function is called from undoMove as well. there could be a better solution.
-                if(fillableInSquareIndex(i))
-                {
-                    labels[i].style.backgroundColor = colors.BLUE;
-                }
             }
         }
-    }
-
-    function fillableInSquareIndex(squareIndex)
-    {
-        for(let i=0; i < levelFillablePositions[currentLevelIndex].length; i++)
-        {
-            if(levelFillablePositions[currentLevelIndex][i] == squareIndex)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     function clearBoard()
@@ -242,14 +224,12 @@ document.addEventListener('DOMContentLoaded', () =>
         {
             if(!editMode)
             {
-                if(selectionDoesNotSatisfyRules()) //it's possible that this doesn't solve the problem correctly
+                if(!selectionSatisfiesRules())
                 {
-                    console.log("set board to before select")
                     setBoardToBeforeSelect();
                 }
                 else
                 {
-                    console.log("made a move")
                     currentMoveAmt--;
                     updateMovesElement();
                     if(boardEmpty()) 
@@ -266,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () =>
             originalSelectionColor = colors.NONE;
             currentlySelectedSquares = [];
             ismousedown = false;
-            logBoardColors();
+            //logBoardColors();
             selectionBox.remove();
         }
     }
@@ -290,9 +270,9 @@ document.addEventListener('DOMContentLoaded', () =>
         }
     }
 
-    function selectionDoesNotSatisfyRules()
+    function selectionSatisfiesRules()
     {
-        return (newCheckboxAmt < 1 || removedCheckboxAmt < 1) && colorStillExists(originalSelectionColor);
+        return (newCheckboxAmt >= 1 && removedCheckboxAmt >= 1) && (originalSelectionColor != colors.NONE && originalSelectionColor != colors.GREY) || !colorStillExists(originalSelectionColor);
     }
 
     function disableSelectionBox()
@@ -373,7 +353,6 @@ document.addEventListener('DOMContentLoaded', () =>
             currentMoveAmt++;
             updateMovesElement();
             var lastBoardColors = pastBoardStates.pop();
-            console.log(lastBoardColors);
             for(let i = 0; i < width*width; i++)
             {
                 labels[i].style.backgroundColor = lastBoardColors[i];
